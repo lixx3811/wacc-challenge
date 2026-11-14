@@ -25,6 +25,8 @@
   button.main { background:var(--navy); color:#fff; }
   .assume { font-size:14px; }
   .assume b { color:var(--navy); }
+  .links { font-size:12.5px; margin:-4px 0 6px; color:var(--mute); }
+  .conv { color:#167a4a !important; }
   .warn { color:var(--terra); font-size:14px; margin:4px 0; }
   .err { color:#b00020; font-weight:bold; font-size:14px; margin:4px 0; }
   .res { display:flex; gap:30px; font-size:16px; flex-wrap:wrap; }
@@ -90,16 +92,25 @@
     <h1>WACC Challenge</h1>
     <div class="sub">B6302 Corporate Finance · Lecture 6 · Estimate a WACC two ways: with the firm's own beta and with two peers' betas</div>
 
-    <div class="box help">
+    <div class="box help" style="font-size:14px;color:var(--ink)">
       <b>Your team:</b> pick a publicly traded <b>focal firm</b> and <b>two peers</b> with similar operations (not banks or insurers).
-      From <b>Yahoo Finance</b>: the quote page (price, market cap, beta "5Y Monthly") and the balance sheet
-      ("Total Debt", "Cash, Cash Equivalents &amp; Short Term Investments", latest quarter). Type all dollar amounts in
-      <b>millions of USD</b> (Yahoo shows the market cap in B or T: 1.019T = 1,019,000; 490.194B = 490,194).
-      Then build the same numbers in your blank Excel template, check they match this page, and <b>Download PDF</b> to submit on Canvas.
+      For each firm, type its <b>ticker</b> below: the two Yahoo Finance links for that firm appear in its box. Then copy, in this order:
+      <ol style="margin:6px 0 4px 18px;padding:0">
+        <li><b>Summary page</b> · <code>https://finance.yahoo.com/quote/<span style="color:var(--terra)">TICKER</span>/</code>
+            (replace TICKER, e.g. <a href="https://finance.yahoo.com/quote/AAL/" target="_blank">…/quote/AAL/</a>):
+            <b>Previous Close</b> · <b>Market Cap (intraday)</b> · <b>Beta (5Y Monthly)</b></li>
+        <li><b>Key statistics page</b> · <code>https://finance.yahoo.com/quote/<span style="color:var(--terra)">TICKER</span>/key-statistics/</code>
+            (e.g. <a href="https://finance.yahoo.com/quote/DAL/key-statistics/" target="_blank">…/quote/DAL/key-statistics/</a>), section
+            <i>Balance Sheet</i>: <b>Total Cash (mrq)</b> · <b>Total Debt (mrq)</b>; and the <b>Most Recent Quarter (mrq)</b> date (section <i>Fiscal Year</i>).</li>
+      </ol>
+      Type amounts <b>as Yahoo shows them</b> (e.g. <code>26.4B</code>, <code>1.019T</code>, <code>845M</code>) or in millions: the page converts everything to
+      <b>USD millions</b> (shown next to each box). Then build the same numbers in your blank Excel template, check they match this page, and
+      <b>Download PDF</b> to submit on Canvas.
     </div>
 
     <div class="box row">
       <label style="grid-template-columns:auto 220px;margin:0"><span><b>Learning team</b> (e.g. FIN B7)</span><input id="team" placeholder="FIN B7"></label>
+      <label style="grid-template-columns:auto 190px;margin:0"><span><b>Date of the data</b></span><input id="ddate" placeholder="November 16, 2026"></label>
       <button class="main" id="bPdf">Download PDF</button>
       <button id="bDemo">Load the Walmart example</button>
       <button id="bClear">Clear</button>
@@ -122,43 +133,52 @@
 
 <script>
 const T = 21, RD = 5.76, RF = 5.10, MRP = 5;            // percent
-const FIELDS = [
-  ["name", "Firm name", "text", "e.g. Walmart Inc."],
-  ["tic", "Ticker", "text", "WMT"],
-  ["bsdate", "Balance-sheet date", "text", "latest quarter, e.g. 7/31/2026"],
-  ["debt", "Total Debt", "num", "Yahoo balance sheet, $M"],
-  ["cash", "Cash, Cash Equiv. & ST Investments", "num", "Yahoo balance sheet, $M"],
-  ["price", "Share price", "num", "Yahoo quote, USD"],
-  ["pxdate", "Price date (close of)", "text", "e.g. November 13, 2026"],
-  ["mcap", "Market cap", "num", "in $ millions"],
-  ["beta", "Beta (5Y Monthly)", "num", "Yahoo quote"],
+const FIELDS = [            // in the order students meet them on Yahoo Finance
+  ["name", "Firm name", "text", "as on Yahoo, e.g. Delta Air Lines, Inc."],
+  ["tic", "Ticker", "text", "e.g. DAL"],
+  ["price", "Previous Close", "num", "summary page, USD per share", "px"],
+  ["mcap", "Market Cap (intraday)", "num", "summary page, e.g. 38.5B", "m"],
+  ["beta", "Beta (5Y Monthly)", "num", "summary page", "x"],
+  ["cash", "Total Cash (mrq)", "num", "key statistics, e.g. 3.07B", "m"],
+  ["debt", "Total Debt (mrq)", "num", "key statistics, e.g. 26.4B", "m"],
+  ["bsdate", "Most Recent Quarter (mrq)", "text", "key statistics, e.g. 9/30/2026"],
 ];
 const ROLES = [["f", "Focal firm", "the firm you value"], ["p1", "Peer 1", "similar operations"], ["p2", "Peer 2", "similar operations"]];
 const DEMO = {
-  team: "Walmart example",
-  f:  { name: "Walmart Inc.", tic: "WMT", bsdate: "31-Jul-2026", debt: 73755, cash: 11529, price: 128.09, pxdate: "November 13, 2026", mcap: 1019350, beta: 0.53 },
-  p1: { name: "Costco Wholesale Corporation", tic: "COST", bsdate: "31-Aug-2026", debt: 10181, cash: 21301, price: 1106.21, pxdate: "November 13, 2026", mcap: 490194, beta: 0.85 },
-  p2: { name: "Target Corporation", tic: "TGT", bsdate: "31-Jul-2026", debt: 19090, cash: 5411, price: 161.45, pxdate: "November 13, 2026", mcap: 73346, beta: 0.93 },
+  team: "Walmart example", ddate: "November 13, 2026",
+  f:  { name: "Walmart Inc.", tic: "WMT", bsdate: "7/31/2026", debt: 73755, cash: 11529, price: 128.09, mcap: 1019350, beta: 0.53 },
+  p1: { name: "Costco Wholesale Corporation", tic: "COST", bsdate: "8/31/2026", debt: 10181, cash: 21301, price: 1106.21, mcap: 490194, beta: 0.85 },
+  p2: { name: "Target Corporation", tic: "TGT", bsdate: "7/31/2026", debt: 19090, cash: 5411, price: 161.45, mcap: 73346, beta: 0.93 },
 };
 const KEY = "wacc-challenge-v1";
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 // ---------- form ----------
-$("forms").innerHTML = ROLES.map(([k, h, s]) => `<div class="box firm"><h3>${h} <small>· ${s}</small></h3>` +
-  FIELDS.map(([f, lab, ty, hint]) => `<label><span>${lab}<small>${hint}</small></span><input id="${k}_${f}" data-k="${k}" data-f="${f}" ${ty === "num" ? 'inputmode="decimal"' : ""}></label>`).join("") + "</div>").join("");
+$("forms").innerHTML = ROLES.map(([k, h, s]) => `<div class="box firm"><h3>${h} <small>· ${s}</small></h3>
+  <div class="links" id="${k}_links">Type the ticker to get this firm's Yahoo links.</div>` +
+  FIELDS.map(([f, lab, ty, hint, u]) => `<label><span>${lab}<small>${hint}</small><small class="conv" id="${k}_${f}_c"></small></span><input id="${k}_${f}" data-k="${k}" data-f="${f}" ${ty === "num" ? 'inputmode="decimal"' : ""}></label>`).join("") + "</div>").join("");
+// Yahoo-style amounts: 26.4B, 1.019T, 845M, 1,234 (millions)  ->  USD millions
+function num(v, unit) {
+  v = String(v ?? "").trim().replace(/[,$\s]/g, ""); if (v === "") return NaN;
+  const m = v.match(/^(-?[0-9.]+)([kKmMbBtT]?)$/); if (!m) return NaN;
+  const x = Number(m[1]); if (isNaN(x)) return NaN;
+  if (unit !== "m") return x;
+  return x * ({ "": 1, k: 1e-3, K: 1e-3, m: 1, M: 1, b: 1e3, B: 1e3, t: 1e6, T: 1e6 }[m[2]]);
+}
 function read() {
-  const st = { team: $("team").value };
-  for (const [k] of ROLES) { st[k] = {}; for (const [f, , ty] of FIELDS) { const v = $(`${k}_${f}`).value.trim(); st[k][f] = ty === "num" ? (v === "" ? NaN : Number(v.replace(/[,$\s]/g, ""))) : v; } }
+  const st = { team: $("team").value, ddate: $("ddate").value, raw: {} };
+  for (const [k] of ROLES) { st[k] = {}; st.raw[k] = {};
+    for (const [f, , ty, , u] of FIELDS) { const v = $(`${k}_${f}`).value.trim(); st.raw[k][f] = v; st[k][f] = ty === "num" ? num(v, u) : v; } }
   return st;
 }
 function fill(st) {
-  $("team").value = st.team || "";
-  for (const [k] of ROLES) for (const [f] of FIELDS) { const v = st[k]?.[f]; $(`${k}_${f}`).value = v === undefined || (typeof v === "number" && isNaN(v)) ? "" : v; }
+  $("team").value = st.team || ""; $("ddate").value = st.ddate || "";
+  for (const [k] of ROLES) for (const [f] of FIELDS) { const v = st.raw?.[k]?.[f] ?? st[k]?.[f]; $(`${k}_${f}`).value = v === undefined || (typeof v === "number" && isNaN(v)) ? "" : v; }
 }
 document.addEventListener("input", () => { localStorage.setItem(KEY, JSON.stringify(read())); render(); });
 $("bDemo").onclick = () => { fill(DEMO); localStorage.setItem(KEY, JSON.stringify(read())); render(); };
-$("bClear").onclick = () => { if (confirm("Clear all inputs?")) { fill({ team: "", f: {}, p1: {}, p2: {} }); localStorage.removeItem(KEY); render(); } };
+$("bClear").onclick = () => { if (confirm("Clear all inputs?")) { fill({ team: "", ddate: "", f: {}, p1: {}, p2: {} }); localStorage.removeItem(KEY); render(); } };
 $("bPdf").onclick = () => { const s = read(); document.title = `WACC_Challenge_${(s.team || "team").replace(/\W+/g, "_")}_${s.f.tic || ""}`; window.print(); };
 
 // ---------- numbers (rounded exactly as on the Lecture 6 slides) ----------
@@ -189,6 +209,7 @@ function check(s) {
     if (x.beta < 0 || x.beta > 3) warns.push(`${h}: a beta of ${x.beta} is unusual: check Yahoo's "Beta (5Y Monthly)".`);
     if (k !== "f" && x.debt - x.cash < 0) warns.push(`${h} has net cash (ND < 0): its asset beta comes out above its equity beta. That is fine.`);
   }
+  if (!s.ddate) errs.push("Date of the data is missing (top of the page)");
   if (!errs.length && s.f.debt - s.f.cash + s.f.mcap <= 0) errs.push("Focal firm: ND + E must be positive");
   return { errs, warns };
 }
@@ -225,26 +246,26 @@ function waccTable(R, rE, beta, hiRows, noteL, noteR) {
     </div>`;
 }
 function bsCard(x, lines, hi) {
-  return `<table class="card"><tr><td colspan="2" class="cap">${esc(x.name)} · Yahoo Finance balance sheet</td></tr>
-    <tr><td class="cap">All values USD Millions.</td><td class="cap" style="text-align:right">${esc(x.bsdate)}</td></tr>
+  return `<table class="card"><tr><td colspan="2" class="cap">${esc(x.name)} · Yahoo Finance key statistics (balance sheet)</td></tr>
+    <tr><td class="cap">All values USD Millions.</td><td class="cap" style="text-align:right">mrq ${esc(x.bsdate)}</td></tr>
     ${lines.map(([l, v], i) => `<tr style="${hi.includes(i) ? "background:var(--hl)" : ""}"><td>${l}</td><td style="text-align:right">${n0(v)}</td></tr>`).join("")}</table>`;
 }
 function quote(x) {
   return `<table class="quote"><tr><td colspan="2"><b>${esc(x.name)} (${esc(x.tic)})</b></td></tr>
-    <tr><td colspan="2"><span class="px">${fx(x.price, 2)}</span> <span class="muted" style="font-size:13px">At close: ${esc(x.pxdate)}</span></td></tr>
+    <tr><td>Previous Close</td><td style="text-align:right"><span class="px">${fx(x.price, 2)}</span></td></tr>
     <tr style="background:var(--hl)"><td>Market Cap (intraday)</td><td style="text-align:right">${capTxt(x.mcap)}</td></tr>
     <tr style="background:var(--hl)"><td>Beta (5Y Monthly)</td><td style="text-align:right">${fx(x.beta, 2)}</td></tr>
-    <tr><td colspan="2" class="muted" style="text-align:right;font-size:13px;border:0">Source: Yahoo Finance</td></tr></table>`;
+    <tr><td colspan="2" class="muted" style="text-align:right;font-size:13px;border:0">Source: Yahoo Finance summary page, ${esc(S.ddate || "")}</td></tr></table>`;
 }
 function peerPages(R, k) {
   const x = R.F[k], nm = esc(x.name.replace(/,?\s+(Inc\.?|Corporation|Corp\.?|Company|Co\.?|Ltd\.?|plc|S\.A\.)$/i, ""));
   const title = `Step 1: Asset Beta at ${nm}`;
   const out = [];
   out.push(slide(title, `<div class="two"><ul class="b"><li>Net Debt = Debt − Cash</li><li>Debt = ${n0(x.debt)}</li></ul>
-    <div>${bsCard(x, [["Total Debt", x.debt]], [0])}</div></div>`));
+    <div>${bsCard(x, [["Total Debt (mrq)", x.debt]], [0])}</div></div>`));
   out.push(slide(title, `<div class="two"><ul class="b"><li>Net Debt = Debt − Cash</li><li>Debt = ${n0(x.debt)}</li><li>Cash = ${n0(x.cash)}</li>
     <li>ND = ${n0(x.debt)} − ${n0(x.cash)}<br>&nbsp;&nbsp;&nbsp;&nbsp;= ${n0(x.nd)}</li></ul>
-    <div>${bsCard(x, [["Total Debt", x.debt], ["Cash, Cash Equivalents &amp; Short Term Investments", x.cash]], [1])}</div></div>`));
+    <div>${bsCard(x, [["Total Debt (mrq)", x.debt], ["Total Cash (mrq)", x.cash]], [1])}</div></div>`));
   out.push(slide(title, `<div class="center" style="display:flex;justify-content:center;padding-top:20px">${quote(x)}</div>`));
   out.push(slide(title, `<div class="eq"><i>β<sub>A</sub></i> = ${fr("1", "1 + " + NDE)} <i>β<sub>E</sub></i></div>
     <div style="display:flex;justify-content:center"><table class="t" style="min-width:3.8in"><tr><th>${nm}</th><th class="r">Value</th></tr>
@@ -255,7 +276,13 @@ function peerPages(R, k) {
 }
 let S;
 function render() {
-  S = read(); const { errs, warns } = check(S);
+  S = read();
+  for (const [k] of ROLES) {
+    const t = (S[k].tic || "").trim().toUpperCase();
+    $(`${k}_links`).innerHTML = t ? `Yahoo: <a href="https://finance.yahoo.com/quote/${encodeURIComponent(t)}/" target="_blank">summary page ↗</a> · <a href="https://finance.yahoo.com/quote/${encodeURIComponent(t)}/key-statistics/" target="_blank">key statistics ↗</a>` : "Type the ticker to get this firm's Yahoo links.";
+    for (const [f, , ty, , u] of FIELDS) if (u === "m") { const x = S[k][f]; $(`${k}_${f}_c`).textContent = isNaN(x) ? "" : `= ${n0(x)} million`; }
+  }
+  const { errs, warns } = check(S);
   $("checks").innerHTML = errs.length || warns.length ? errs.map(e => `<div class="err">✗ ${esc(e)}</div>`).join("") + warns.map(w => `<div class="warn">⚠ ${esc(w)}</div>`).join("") : `<div style="color:#167a4a">✓ All inputs filled in.</div>`;
   if (errs.length) { $("results").innerHTML = `<div class="help">Results appear when every field is filled in.</div>`; $("deck").innerHTML = ""; return; }
   const R = compute(S), f = R.F.f, p1 = R.F.p1, p2 = R.F.p2;
@@ -268,7 +295,7 @@ function render() {
     <div style="margin-top:0.25in;font-size:19px"><b>Focal firm:</b> ${fn} (${esc(f.tic)})<br><b>Peers:</b> ${esc(p1.name)} (${esc(p1.tic)}) and ${esc(p2.name)} (${esc(p2.tic)})</div>
     <div style="margin-top:0.22in;font-size:20px">WACC with ${esc(f.tic)}'s own beta: <span class="key">${pc(R.waccOwn)}</span> &nbsp;·&nbsp; WACC with the peers' beta: <span class="key">${pc(R.waccComp)}</span></div>
     <div class="muted" style="margin-top:0.3in;font-size:13px">Assumptions: t = ${T}%, r<sub>D</sub> = ${pc(RD)}, r<sub>f</sub> = ${pc(RF)} (10-year Treasury), market risk premium = ${MRP}%.
-      Data: Yahoo Finance (quotes at the close of ${esc(f.pxdate)}; balance sheets: ${esc(f.tic)} ${esc(f.bsdate)}, ${esc(p1.tic)} ${esc(p1.bsdate)}, ${esc(p2.tic)} ${esc(p2.bsdate)}). USD millions.</div></div>`));
+      Data: Yahoo Finance, ${esc(S.ddate || "")} (summary page: previous close, market cap, beta; key statistics: total cash and total debt, most recent quarter ${esc(f.tic)} ${esc(f.bsdate)}, ${esc(p1.tic)} ${esc(p1.bsdate)}, ${esc(p2.tic)} ${esc(p2.bsdate)}). USD millions.</div></div>`));
   // own beta (p. 27 format)
   pages.push(slide(`Estimate WACC for ${fn}`, waccTable(R, pc(R.reOwn), fx(f.beta, 2), [4, 5, 6],
     `<div class="wl">WACC<br>= ${R.wnd.toFixed(3)} × (1 − ${T}%) × ${pc(RD)}<br>&nbsp;&nbsp;+ ${R.we.toFixed(3)} × ${pc(R.reOwn)} = <b>${pc(R.waccOwn)}</b></div>`,
