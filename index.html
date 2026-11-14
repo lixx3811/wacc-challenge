@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WACC Challenge · B6302 Lecture 6</title>
+<style>
+  :root { --navy:#2E3D52; --terra:#B5552D; --ink:#1F2328; --mute:#6B7079; --rule:#C9CDD2; --debt:#59725F; --ev:#3E5675;
+          --hl:#F4E3DA; --hlnavy:#E3E8EF; --gray:#F2F2F2; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif; color:var(--ink); background:#eef0f3; }
+  .app { max-width:1180px; margin:0 auto; padding:18px 20px 60px; }
+  h1 { font-family: Newsreader, Georgia, serif; color:var(--navy); margin:4px 0 2px; font-size:30px; }
+  .sub { color:var(--mute); margin-bottom:14px; }
+  .box { background:#fff; border-radius:10px; padding:14px 16px; box-shadow:0 1px 4px #0001; margin-bottom:14px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .firm h3 { margin:0 0 8px; color:var(--navy); font-size:17px; }
+  .firm h3 small { color:var(--terra); font-weight:normal; }
+  label { display:grid; grid-template-columns:1fr 130px; gap:8px; align-items:center; font-size:13.5px; margin:5px 0; }
+  label span small { color:var(--mute); display:block; font-size:11.5px; }
+  input { font:inherit; font-size:14px; padding:4px 6px; border:1px solid var(--rule); border-radius:4px; width:100%; background:#FFFBEA; }
+  input:focus { outline:2px solid var(--navy); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  button { font:inherit; font-size:14px; padding:8px 14px; border-radius:6px; border:0; cursor:pointer; background:var(--hlnavy); color:var(--navy); font-weight:bold; }
+  button.main { background:var(--navy); color:#fff; }
+  .assume { font-size:14px; }
+  .assume b { color:var(--navy); }
+  .warn { color:var(--terra); font-size:14px; margin:4px 0; }
+  .err { color:#b00020; font-weight:bold; font-size:14px; margin:4px 0; }
+  .res { display:flex; gap:30px; font-size:16px; flex-wrap:wrap; }
+  .res .big { font-size:30px; color:var(--navy); font-weight:bold; }
+  .help { font-size:13px; color:var(--mute); line-height:1.45; }
+  /* ---------- slides ---------- */
+  #deckwrap { overflow:auto; }
+  .slide { width:10in; height:5.625in; background:#fff; position:relative; margin:0 auto 18px; box-shadow:0 2px 10px #0002;
+           padding:0.3in 0.42in 0.4in; overflow:hidden; font-size:18px; line-height:1.35; }
+  .slide .title { font-family: Newsreader, Georgia, serif; font-size:27px; color:var(--navy); padding-bottom:6px; border-bottom:1.5px solid var(--navy); margin-bottom:12px; }
+  .slide .tag { position:absolute; top:0.2in; right:0.42in; font-size:11px; color:var(--navy); font-weight:bold; letter-spacing:.02em; }
+  .slide .foot { position:absolute; left:0.42in; right:0.42in; bottom:0.15in; display:flex; justify-content:space-between; font-size:10px; color:var(--mute); }
+  .slide .src { position:absolute; left:0.42in; bottom:0.36in; font-size:11px; color:var(--mute); }
+  .slide::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:var(--navy); }
+  .key { color:var(--terra); font-weight:bold; }
+  .muted { color:var(--mute); }
+  .d { color:var(--debt); } .e { color:var(--terra); } .a { color:var(--ev); }
+  ul.b { margin:0; padding-left:26px; } ul.b li { margin:8px 0; } ul.b ul { font-size:16px; list-style:circle; }
+  .frac { display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 3px; line-height:1.15; }
+  .frac > span:first-child { border-bottom:1.4px solid currentColor; padding:0 3px 1px; }
+  .frac > span:last-child { padding:1px 3px 0; }
+  .eq { text-align:center; margin:8px 0; font-size:19px; }
+  .brk { font-size:150%; vertical-align:middle; font-weight:200; }
+  table.t { border-collapse:collapse; font-size:17px; }
+  table.t th { text-align:left; padding:3px 9px; border-bottom:1.5px solid var(--ink); }
+  table.t th.r, table.t td.r { text-align:right; }
+  table.t td { padding:3px 9px; }
+  table.t tr.sh td { background:var(--gray); }
+  table.t tr.hl td { background:var(--hl); }
+  table.t tr.last td { border-bottom:1.5px solid var(--ink); }
+  table.t td.cellhl { background:var(--hl); }
+  .card { font-size:15px; border-collapse:collapse; }
+  .card td { padding:6px 10px; border-bottom:1px solid #ddd; }
+  .card .cap { color:var(--mute); font-size:12px; }
+  .card td:last-child { white-space:nowrap; }
+  .wl { text-align:left; color:var(--navy); font-size:13.5px; white-space:nowrap; }
+  .quote { font-size:16px; border-collapse:collapse; min-width:3.9in; }
+  .quote td { padding:5px 10px; border-bottom:1px solid #ddd; }
+  .quote .px { font-size:28px; font-weight:bold; }
+  .callout { border:1.5px solid var(--terra); padding:5px 8px; font-size:14px; }
+  .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-top:10px; }
+  .steps > div { padding:0 10px; border-right:1.2px solid var(--navy); font-size:15.5px; min-height:3.6in; display:flex; flex-direction:column; }
+  .steps > div:last-child { border-right:0; }
+  .steps > div.off { color:#b9bdc4; }
+  .steps .f { margin-top:auto; margin-bottom:0.2in; font-size:15px; }
+  .two { display:grid; grid-template-columns: 1fr 1fr; gap:30px; align-items:start; }
+  .center { text-align:center; }
+  .cover h2 { font-family: Newsreader, Georgia, serif; color:var(--navy); font-size:38px; margin:0.35in 0 6px; }
+  @media print {
+    @page { size: 10in 5.625in; margin:0; }
+    body { background:#fff; }
+    .noprint { display:none !important; }
+    .app { max-width:none; padding:0; margin:0; }
+    .slide { margin:0; box-shadow:none; page-break-after:always; break-after:page; }
+    #deckwrap { overflow:visible; }
+    .scale { transform:none !important; height:auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="noprint">
+    <h1>WACC Challenge</h1>
+    <div class="sub">B6302 Corporate Finance · Lecture 6 · Estimate a WACC two ways: with the firm's own beta and with two peers' betas</div>
+
+    <div class="box help">
+      <b>Your team:</b> pick a publicly traded <b>focal firm</b> and <b>two peers</b> with similar operations (not banks or insurers).
+      From <b>Yahoo Finance</b>: the quote page (price, market cap, beta "5Y Monthly") and the balance sheet
+      ("Total Debt", "Cash, Cash Equivalents &amp; Short Term Investments", latest quarter). Type all dollar amounts in
+      <b>millions of USD</b> (Yahoo shows the market cap in B or T: 1.019T = 1,019,000; 490.194B = 490,194).
+      Then build the same numbers in your blank Excel template, check they match this page, and <b>Download PDF</b> to submit on Canvas.
+    </div>
+
+    <div class="box row">
+      <label style="grid-template-columns:auto 220px;margin:0"><span><b>Learning team</b> (e.g. FIN B7)</span><input id="team" placeholder="FIN B7"></label>
+      <button class="main" id="bPdf">Download PDF</button>
+      <button id="bDemo">Load the Walmart example</button>
+      <button id="bClear">Clear</button>
+    </div>
+
+    <div class="grid3" id="forms"></div>
+
+    <div class="box assume">
+      Fixed for every team (as in the Walmart case): <b>tax rate t = 21%</b> · <b>cost of debt r<sub>D</sub> = 5.76%</b> ·
+      <b>risk-free rate r<sub>f</sub> = 5.10%</b> (10-year Treasury) · <b>market risk premium = 5%</b>.
+      Rounding as on the slides: weights to 3 decimals; asset betas and the relevered beta to 2; the average asset beta to 3; r<sub>E</sub> and the WACC to 2 (in %).
+    </div>
+
+    <div class="box" id="checks"></div>
+    <div class="box" id="results"></div>
+    <div class="help" style="margin:4px 0 10px">Preview of your PDF (one page per slide). In the print window choose <b>Save as PDF</b>, layout <b>Landscape</b>, margins <b>None</b>; Chrome works best.</div>
+  </div>
+  <div id="deckwrap"><div id="deck"></div></div>
+</div>
+
+<script>
+const T = 21, RD = 5.76, RF = 5.10, MRP = 5;            // percent
+const FIELDS = [
+  ["name", "Firm name", "text", "e.g. Walmart Inc."],
+  ["tic", "Ticker", "text", "WMT"],
+  ["bsdate", "Balance-sheet date", "text", "latest quarter, e.g. 7/31/2026"],
+  ["debt", "Total Debt", "num", "Yahoo balance sheet, $M"],
+  ["cash", "Cash, Cash Equiv. & ST Investments", "num", "Yahoo balance sheet, $M"],
+  ["price", "Share price", "num", "Yahoo quote, USD"],
+  ["pxdate", "Price date (close of)", "text", "e.g. November 13, 2026"],
+  ["mcap", "Market cap", "num", "in $ millions"],
+  ["beta", "Beta (5Y Monthly)", "num", "Yahoo quote"],
+];
+const ROLES = [["f", "Focal firm", "the firm you value"], ["p1", "Peer 1", "similar operations"], ["p2", "Peer 2", "similar operations"]];
+const DEMO = {
+  team: "Walmart example",
+  f:  { name: "Walmart Inc.", tic: "WMT", bsdate: "31-Jul-2026", debt: 73755, cash: 11529, price: 128.09, pxdate: "November 13, 2026", mcap: 1019350, beta: 0.53 },
+  p1: { name: "Costco Wholesale Corporation", tic: "COST", bsdate: "31-Aug-2026", debt: 10181, cash: 21301, price: 1106.21, pxdate: "November 13, 2026", mcap: 490194, beta: 0.85 },
+  p2: { name: "Target Corporation", tic: "TGT", bsdate: "31-Jul-2026", debt: 19090, cash: 5411, price: 161.45, pxdate: "November 13, 2026", mcap: 73346, beta: 0.93 },
+};
+const KEY = "wacc-challenge-v1";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ---------- form ----------
+$("forms").innerHTML = ROLES.map(([k, h, s]) => `<div class="box firm"><h3>${h} <small>· ${s}</small></h3>` +
+  FIELDS.map(([f, lab, ty, hint]) => `<label><span>${lab}<small>${hint}</small></span><input id="${k}_${f}" data-k="${k}" data-f="${f}" ${ty === "num" ? 'inputmode="decimal"' : ""}></label>`).join("") + "</div>").join("");
+function read() {
+  const st = { team: $("team").value };
+  for (const [k] of ROLES) { st[k] = {}; for (const [f, , ty] of FIELDS) { const v = $(`${k}_${f}`).value.trim(); st[k][f] = ty === "num" ? (v === "" ? NaN : Number(v.replace(/[,$\s]/g, ""))) : v; } }
+  return st;
+}
+function fill(st) {
+  $("team").value = st.team || "";
+  for (const [k] of ROLES) for (const [f] of FIELDS) { const v = st[k]?.[f]; $(`${k}_${f}`).value = v === undefined || (typeof v === "number" && isNaN(v)) ? "" : v; }
+}
+document.addEventListener("input", () => { localStorage.setItem(KEY, JSON.stringify(read())); render(); });
+$("bDemo").onclick = () => { fill(DEMO); localStorage.setItem(KEY, JSON.stringify(read())); render(); };
+$("bClear").onclick = () => { if (confirm("Clear all inputs?")) { fill({ team: "", f: {}, p1: {}, p2: {} }); localStorage.removeItem(KEY); render(); } };
+$("bPdf").onclick = () => { const s = read(); document.title = `WACC_Challenge_${(s.team || "team").replace(/\W+/g, "_")}_${s.f.tic || ""}`; window.print(); };
+
+// ---------- numbers (rounded exactly as on the Lecture 6 slides) ----------
+const rnd = (x, d) => { const m = 10 ** d; return Math.sign(x) * Math.round(Math.abs(x) * m + 1e-9) / m; };
+const n0 = x => (x < 0 ? "−" : "") + Math.abs(Math.round(x)).toLocaleString("en-US");
+const fx = (x, d) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(d);
+const pc = x => fx(x, 2) + "%";
+const capTxt = m => m >= 1e6 ? (m / 1e6).toFixed(3) + "T" : m >= 1e3 ? (m / 1e3).toFixed(3) + "B" : m.toFixed(1) + "M";
+function compute(s) {
+  const F = {};
+  for (const [k] of ROLES) { const x = s[k]; F[k] = { ...x, nd: x.debt - x.cash }; F[k].nde = F[k].nd / x.mcap; }
+  const f = F.f, tot = f.nd + f.mcap;
+  const wnd = rnd(f.nd / tot, 3), we = rnd(1 - wnd, 3);
+  const reOwn = rnd(RF + f.beta * MRP, 2), waccOwn = rnd(wnd * (1 - T / 100) * RD + we * reOwn, 2);
+  for (const k of ["p1", "p2"]) F[k].ba = rnd(F[k].beta / (1 + F[k].nde), 2);
+  const baAvg = rnd((F.p1.ba + F.p2.ba) / 2, 3), beRel = rnd((1 + f.nde) * baAvg, 2);
+  const reComp = rnd(RF + beRel * MRP, 2), waccComp = rnd(wnd * (1 - T / 100) * RD + we * reComp, 2);
+  return { F, tot, wnd, we, reOwn, waccOwn, baAvg, beRel, reComp, waccComp };
+}
+function check(s) {
+  const errs = [], warns = [];
+  for (const [k, h] of ROLES) {
+    const x = s[k];
+    for (const [f, lab, ty] of FIELDS) if (ty === "num" ? isNaN(x[f]) : !x[f]) errs.push(`${h}: ${lab} is missing${ty === "num" && x[f] !== undefined && String(x[f]) !== "NaN" ? "" : ""}`);
+    if (x.mcap <= 0) errs.push(`${h}: market cap must be positive`);
+    if (x.debt < 0 || x.cash < 0) errs.push(`${h}: debt and cash cannot be negative`);
+    if (x.mcap > 0 && x.mcap < 1000 && x.debt > 5000) warns.push(`${h}: market cap ${x.mcap} is small next to debt ${x.debt}: did you type it in billions? Type millions.`);
+    if (x.beta < 0 || x.beta > 3) warns.push(`${h}: a beta of ${x.beta} is unusual: check Yahoo's "Beta (5Y Monthly)".`);
+    if (k !== "f" && x.debt - x.cash < 0) warns.push(`${h} has net cash (ND < 0): its asset beta comes out above its equity beta. That is fine.`);
+  }
+  if (!errs.length && s.f.debt - s.f.cash + s.f.mcap <= 0) errs.push("Focal firm: ND + E must be positive");
+  return { errs, warns };
+}
+
+// ---------- slides ----------
+const fr = (a, b, cls = "") => `<span class="frac ${cls}"><span>${a}</span><span>${b}</span></span>`;
+const NDE = fr("ND", "<i>E</i>");
+const WACC = `WACC = ${fr("ND", "ND + <i>E</i>")}(1 − <i>t</i>) <i>r<sub>D</sub></i> + ${fr("<i>E</i>", "ND + <i>E</i>")} <i>r<sub>E</sub></i>`;
+let PAGE = 0, TOTAL = 0;
+function slide(title, body, src = "") {
+  PAGE++;
+  return `<section class="slide">${title ? `<div class="title">${title}</div>` : ""}<div class="tag">WACC Challenge · ${esc(S.team || "Team")}</div>${body}
+    ${src ? `<div class="src">Source: ${src}</div>` : ""}<div class="foot"><span>${esc(S.team || "")} · B6302 Corporate Finance, Fall 2026</span><span>Lecture 6 · WACC Challenge</span><span>${PAGE} / @@TOTAL@@</span></div></section>`;
+}
+function steps(on) {
+  const cols = [
+    [`<b>1. <span class="${on.includes(1) ? "key" : ""}">Unlever</span></b> the equity beta from each comparable firm to estimate the underlying asset beta:`, `<i>β<sub>A</sub></i> = ${fr("1", "1 + " + NDE)} <i>β<sub>E</sub></i>`],
+    [`<b>2.</b> If you have more than one comparable firm, <b>average</b> the asset betas. So if you have <i>K</i> comparables:`, `<i>β̄<sub>A</sub></i> = ${fr("<i>β</i><sup>1</sup><sub><i>A</i></sub> + ⋯ + <i>β</i><sup><i>K</i></sup><sub><i>A</i></sub>", "<i>K</i>")}`],
+    [`<b>3. <span class="${on.includes(3) ? "key" : ""}">Relever</span></b> the (average) asset beta to reflect the leverage at the firm we are valuing:`, `<i>β<sub>E</sub></i> = <span class="brk">[</span>1 + ${NDE}<span class="brk">]</span> <i>β̄<sub>A</sub></i>`],
+    [`<b>4.</b> Use <span class="${on.includes(4) ? "key" : ""}">CAPM</span> to find the cost of equity, then use WACC to find the cost of capital`, `<i>r<sub>E</sub></i> = <i>r<sub>f</sub></i> + <i>β<sub>E</sub></i> × Mkt Risk Premium<br><br>WACC = ${fr("ND", "ND + <i>E</i>")}(1−<i>t</i>)<i>r<sub>D</sub></i> + ${fr("<i>E</i>", "ND + <i>E</i>")}<i>r<sub>E</sub></i>`],
+  ];
+  return slide("The Steps", `<div class="steps">${cols.map((c, i) => `<div class="${on.includes(i + 1) ? "" : "off"}"><div>${c[0]}</div><div class="f">${c[1]}</div></div>`).join("")}</div>`);
+}
+function waccTable(R, rE, beta, hiRows, noteL, noteR) {
+  const f = R.F.f;
+  const rows = [["ND", n0(f.nd)], ["<i>E</i>", n0(f.mcap)], ["<i>t</i>", T + "%"], ["<i>r<sub>D</sub></i>", pc(RD)], ["<i>r<sub>E</sub></i>", rE],
+                ["10-Year Yield", pc(RF)], ["<i>β</i>", beta]];
+  return `<div class="eq">${WACC}</div>
+    <div style="display:grid;grid-template-columns:2.15in 3.55in 2.85in;gap:12px;align-items:start;margin-top:8px">
+      <div class="d" style="text-align:right;padding-top:30px">${fr("ND", "ND + <i>E</i>")}<br>= ${fr(n0(f.nd), n0(R.tot))} = ${R.wnd.toFixed(3)}<br><br>${noteL || ""}</div>
+      <table class="t" style="width:100%"><tr><th>WACC Component</th><th class="r">Value</th></tr>
+        ${rows.map((r, i) => `<tr class="${i % 2 ? "sh" : ""} ${i === rows.length - 1 ? "last" : ""}"><td>${r[0]}</td><td class="r ${hiRows.includes(i) ? "cellhl" : ""}">${r[1]}</td></tr>`).join("")}</table>
+      <div><div class="e">${fr("<i>E</i>", "ND + <i>E</i>")} = ${fr(n0(f.mcap), n0(R.tot))} = ${R.we.toFixed(3)}</div><br>${noteR || ""}</div>
+    </div>`;
+}
+function bsCard(x, lines, hi) {
+  return `<table class="card"><tr><td colspan="2" class="cap">${esc(x.name)} · Yahoo Finance balance sheet</td></tr>
+    <tr><td class="cap">All values USD Millions.</td><td class="cap" style="text-align:right">${esc(x.bsdate)}</td></tr>
+    ${lines.map(([l, v], i) => `<tr style="${hi.includes(i) ? "background:var(--hl)" : ""}"><td>${l}</td><td style="text-align:right">${n0(v)}</td></tr>`).join("")}</table>`;
+}
+function quote(x) {
+  return `<table class="quote"><tr><td colspan="2"><b>${esc(x.name)} (${esc(x.tic)})</b></td></tr>
+    <tr><td colspan="2"><span class="px">${fx(x.price, 2)}</span> <span class="muted" style="font-size:13px">At close: ${esc(x.pxdate)}</span></td></tr>
+    <tr style="background:var(--hl)"><td>Market Cap (intraday)</td><td style="text-align:right">${capTxt(x.mcap)}</td></tr>
+    <tr style="background:var(--hl)"><td>Beta (5Y Monthly)</td><td style="text-align:right">${fx(x.beta, 2)}</td></tr>
+    <tr><td colspan="2" class="muted" style="text-align:right;font-size:13px;border:0">Source: Yahoo Finance</td></tr></table>`;
+}
+function peerPages(R, k) {
+  const x = R.F[k], nm = esc(x.name.replace(/,?\s+(Inc\.?|Corporation|Corp\.?|Company|Co\.?|Ltd\.?|plc|S\.A\.)$/i, ""));
+  const title = `Step 1: Asset Beta at ${nm}`;
+  const out = [];
+  out.push(slide(title, `<div class="two"><ul class="b"><li>Net Debt = Debt − Cash</li><li>Debt = ${n0(x.debt)}</li></ul>
+    <div>${bsCard(x, [["Total Debt", x.debt]], [0])}</div></div>`));
+  out.push(slide(title, `<div class="two"><ul class="b"><li>Net Debt = Debt − Cash</li><li>Debt = ${n0(x.debt)}</li><li>Cash = ${n0(x.cash)}</li>
+    <li>ND = ${n0(x.debt)} − ${n0(x.cash)}<br>&nbsp;&nbsp;&nbsp;&nbsp;= ${n0(x.nd)}</li></ul>
+    <div>${bsCard(x, [["Total Debt", x.debt], ["Cash, Cash Equivalents &amp; Short Term Investments", x.cash]], [1])}</div></div>`));
+  out.push(slide(title, `<div class="center" style="display:flex;justify-content:center;padding-top:20px">${quote(x)}</div>`));
+  out.push(slide(title, `<div class="eq"><i>β<sub>A</sub></i> = ${fr("1", "1 + " + NDE)} <i>β<sub>E</sub></i></div>
+    <div style="display:flex;justify-content:center"><table class="t" style="min-width:3.8in"><tr><th>${nm}</th><th class="r">Value</th></tr>
+      <tr><td>ND</td><td class="r">${n0(x.nd)}</td></tr><tr class="sh"><td><i>E</i></td><td class="r">${n0(x.mcap)}</td></tr>
+      <tr class="last"><td><i>β<sub>E</sub></i></td><td class="r">${fx(x.beta, 2)}</td></tr></table></div>
+    <div class="eq" style="margin-top:18px"><i>β<sub>A</sub></i> = ${fr("1", "1 + " + NDE)} <i>β<sub>E</sub></i> = ${fr(fx(x.beta, 2), "1 + " + fr(n0(x.nd), n0(x.mcap)))} = <b>${fx(x.ba, 2)}</b></div>`));
+  return out;
+}
+let S;
+function render() {
+  S = read(); const { errs, warns } = check(S);
+  $("checks").innerHTML = errs.length || warns.length ? errs.map(e => `<div class="err">✗ ${esc(e)}</div>`).join("") + warns.map(w => `<div class="warn">⚠ ${esc(w)}</div>`).join("") : `<div style="color:#167a4a">✓ All inputs filled in.</div>`;
+  if (errs.length) { $("results").innerHTML = `<div class="help">Results appear when every field is filled in.</div>`; $("deck").innerHTML = ""; return; }
+  const R = compute(S), f = R.F.f, p1 = R.F.p1, p2 = R.F.p2;
+  $("results").innerHTML = `<div class="res"><div>WACC with ${esc(f.tic)}'s own beta (${fx(f.beta, 2)})<div class="big">${pc(R.waccOwn)}</div></div>
+    <div>WACC with the peers' beta (${fx(R.beRel, 2)}, from ${esc(p1.tic)} and ${esc(p2.tic)})<div class="big">${pc(R.waccComp)}</div></div></div>`;
+  PAGE = 0; const pages = [];
+  const fn = esc(f.name);
+  // cover
+  pages.push(slide("", `<div class="cover"><h2>WACC Challenge: ${fn}</h2><div style="font-size:24px;color:var(--terra);font-weight:bold">${esc(S.team || "")}</div>
+    <div style="margin-top:0.25in;font-size:19px"><b>Focal firm:</b> ${fn} (${esc(f.tic)})<br><b>Peers:</b> ${esc(p1.name)} (${esc(p1.tic)}) and ${esc(p2.name)} (${esc(p2.tic)})</div>
+    <div style="margin-top:0.22in;font-size:20px">WACC with ${esc(f.tic)}'s own beta: <span class="key">${pc(R.waccOwn)}</span> &nbsp;·&nbsp; WACC with the peers' beta: <span class="key">${pc(R.waccComp)}</span></div>
+    <div class="muted" style="margin-top:0.3in;font-size:13px">Assumptions: t = ${T}%, r<sub>D</sub> = ${pc(RD)}, r<sub>f</sub> = ${pc(RF)} (10-year Treasury), market risk premium = ${MRP}%.
+      Data: Yahoo Finance (quotes at the close of ${esc(f.pxdate)}; balance sheets: ${esc(f.tic)} ${esc(f.bsdate)}, ${esc(p1.tic)} ${esc(p1.bsdate)}, ${esc(p2.tic)} ${esc(p2.bsdate)}). USD millions.</div></div>`));
+  // own beta (p. 27 format)
+  pages.push(slide(`Estimate WACC for ${fn}`, waccTable(R, pc(R.reOwn), fx(f.beta, 2), [4, 5, 6],
+    `<div class="wl">WACC<br>= ${R.wnd.toFixed(3)} × (1 − ${T}%) × ${pc(RD)}<br>&nbsp;&nbsp;+ ${R.we.toFixed(3)} × ${pc(R.reOwn)} = <b>${pc(R.waccOwn)}</b></div>`,
+    `<div class="e" style="font-size:15px"><i>r<sub>E</sub></i> = "10-Year Yield" + <i>β</i> × ${MRP}%<br>= ${pc(RF)} + ${fx(f.beta, 2)} × ${MRP}%<br>= ${pc(R.reOwn)}</div>`),
+    "Yahoo Finance; t, r<sub>D</sub>, r<sub>f</sub> and the market risk premium as in the Walmart case"));
+  // p. 34 format: same table, own beta shown, to be replaced by the peers'
+  pages.push(slide(`Estimate WACC for ${fn} with Comparables`, waccTable(R, `<span class="muted">${pc(R.reOwn)} → ?</span>`, `<span class="muted">${fx(f.beta, 2)} → ?</span>`, [4, 6], "",
+    `<div class="callout">ND, <i>E</i>, <i>t</i>, <i>r<sub>D</sub></i> and the 10-Year Yield stay the same as in our first calculation</div>
+     <div class="e" style="margin-top:10px;font-size:16px">Now we estimate <i>β</i> (and so <i>r<sub>E</sub></i>) using comparable firms: ${esc(p1.tic)} and ${esc(p2.tic)}</div>`)));
+  pages.push(steps([1]));
+  pages.push(...peerPages(R, "p1"));
+  pages.push(...peerPages(R, "p2"));
+  pages.push(steps([2, 3]));
+  // p. 48 format
+  const n1 = esc(p1.tic), n2 = esc(p2.tic);
+  pages.push(slide("Average Asset Beta from Comparables", `<div class="eq"><i>β</i><sub><i>A</i>-Average</sub> = ${fr(`<i>β</i><sub><i>A</i>-${n1}</sub> + <i>β</i><sub><i>A</i>-${n2}</sub>`, "2")} = ${fr(`${fx(p1.ba, 2)} + ${fx(p2.ba, 2)}`, "2")} = <b>${fx(R.baAvg, 3)}</b></div>
+    <div style="display:flex;justify-content:center;margin:10px 0"><table class="t" style="min-width:3.8in"><tr><th>${fn} Capital Structure</th><th class="r">Value</th></tr>
+      <tr><td>ND</td><td class="r">${n0(f.nd)}</td></tr><tr class="sh last"><td><i>E</i></td><td class="r">${n0(f.mcap)}</td></tr></table></div>
+    <div class="eq"><i>β<sub>E</sub></i> = <span class="brk">[</span>1 + ${NDE}<span class="brk">]</span> <i>β<sub>A</sub></i> = <span class="brk">[</span>1 + ${fr(n0(f.nd), n0(f.mcap))}<span class="brk">]</span> ${fx(R.baAvg, 3)} = <b>${fx(R.beRel, 2)}</b></div>`));
+  pages.push(steps([4]));
+  // p. 51 format
+  pages.push(slide(`Estimate WACC for ${fn}`, waccTable(R, pc(R.reComp), fx(R.beRel, 2), [4, 6],
+    `<div class="wl">WACC<br>= ${R.wnd.toFixed(3)} × (1 − ${T}%) × ${pc(RD)}<br>&nbsp;&nbsp;+ ${R.we.toFixed(3)} × ${pc(R.reComp)} = <b>${pc(R.waccComp)}</b></div>`,
+    `<div class="e" style="font-size:15px"><i>r<sub>E</sub></i> = "10-Year Yield" + <i>β</i> × ${MRP}%<br>= ${pc(RF)} + ${fx(R.beRel, 2)} × ${MRP}%<br>= ${pc(R.reComp)}</div>`),
+    `β from ${n1} and ${n2} (unlevered, averaged, relevered at ${esc(f.tic)}'s ND/<i>E</i>)`));
+  TOTAL = PAGE;
+  $("deck").innerHTML = pages.join("").replaceAll("@@TOTAL@@", TOTAL);
+}
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s) fill(s); } catch (e) {}
+render();
+</script>
+</body>
+</html>
